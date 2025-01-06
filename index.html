@@ -72,7 +72,7 @@
     // 性別を選択
     function selectGender(gender) {
       selectedGender = gender;
-      alert(`${gender} を選択しました。次に年齢を選んでください！`);
+      alert(`${gender} を選択しました。年齢を選択してください`);
     }
 
     // 性別と年齢を保存
@@ -86,7 +86,7 @@
       const genderAndAge = `${selectedGender}-${age}`;
       customerData.push({ genderAndAge, timestamp });
       localStorage.setItem("customerData", JSON.stringify(customerData));
-      alert(`${genderAndAge} を保存しました！`);
+      alert(`${genderAndAge} を保存完了！！！`);
 
       // 選択をリセット
       selectedGender = null;
@@ -125,7 +125,7 @@
     function clearLocalStorage() {
       localStorage.clear();
       customerData = [];
-      alert("ローカルストレージを削除しました！");
+      alert("ローカルストレージを削除");
     }
   </script>
 </body>
