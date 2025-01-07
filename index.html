@@ -10,122 +10,239 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      padding: 20px;
       background-color: #f9f9f9;
+    }
+    h1 {
+      margin-bottom: 10px;
+    }
+    .instruction {
+      font-size: 18px;
+      color: darkred;
+      margin: 10px 0;
+      font-weight: bold;
     }
     button {
       width: 120px;
-      height: 50px;
-      margin: 10px;
-      font-size: 16px;
+      height: 120px;
+      margin: 5px;
+      font-size: 18px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      box-sizing: border-box;
     }
-    .male { background-color: blue; color: white; }
-    .female { background-color: pink; color: white; }
-    .other { background-color: purple; color: white; }
-    .tourist { background-color: green; color: white; }
+    .male {/*男性ボタンのスタイル*/
+      background-color: blue;
+      color:white;
+    }
+    .female {/*女性ボタンのスタイル*/
+      background-color: pink;
+      color:white;
+    }
+
+    .selected { box-shadow: 0px 0px 10px 2px black; }
+    .highlight { border: 3px solid gold; }
+    .payment-button { background-color: lightblue; color: black; }
+    .number-button { background-color: lightgray; color: black; }
+    .ok-button { background-color: green; color: white; }
+    .backspace-button { background-color: red; color: white; }
+    #display {
+      margin: 10px 0;
+      font-size: 24px;
+      border: 1px solid black;
+      width: 260px;
+      height: 50px;
+      text-align: right;
+      padding: 5px;
+      background-color: white;
+    }
+    #calculator {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      width: max-content;
+    }
+    table {
+      margin-top: 20px;
+      border-collapse: collapse;
+      width: 80%;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: lightblue;
+    }
   </style>
 </head>
 <body>
   <h1>顧客データ記録</h1>
-  <div>
-    <button class="male" onclick="selectGender('男性')">男性</button>
-    <button class="female" onclick="selectGender('女性')">女性</button>
-    <button class="other" onclick="selectGender('その他')">その他</button>
-  </div>
-  <div>
-    <button class="age" data-age="10代" onclick="saveGenderAndAge('10代')">10代</button>
-    <button class="age" data-age="20代" onclick="saveGenderAndAge('20代')">20代</button>
-    <button class="age" data-age="30代" onclick="saveGenderAndAge('30代')">30代</button>
-    <button class="age" data-age="40代" onclick="saveGenderAndAge('40代')">40代</button>
-    <button class="age" data-age="50代" onclick="saveGenderAndAge('50代')">50代</button>
-    <button class="age" data-age="60代~" onclick="saveGenderAndAge('60代~')">60代~</button>
-  </div>
-  <button onclick="sendDataToFirebase()">データ送信</button>
-  <button onclick="clearLocalStorage()">ローカルストレージ削除</button>
+  <!-- 指示を表示するエリア -->
+  <div id="instruction" class="instruction">性別を選択してください</div>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <!-- 性別ボタン -->
+  <div id="gender-buttons">
+    <button id="male-button" class="male" onclick="selectGender('男性')">男性</button>
+    <button id="female-button" class="female" onclick="selectGender('女性')">女性</button>
+  </div>
+
+  <!-- 年齢ボタン -->
+  <div id="age-buttons">
+    <button class="age-button" onclick="selectAge('10代')">10代</button>
+    <button class="age-button" onclick="selectAge('20代')">20代</button>
+    <button class="age-button" onclick="selectAge('30代')">30代</button>
+    <button class="age-button" onclick="selectAge('40代')">40代</button>
+    <button class="age-button" onclick="selectAge('50代')">50代</button>
+    <button class="age-button" onclick="selectAge('60代~')">60代~</button>
+  </div>
+
+  <!-- 支払い方法ボタン -->
+  <div id="payment-methods">
+    <button class="payment-button" onclick="selectPayment('クレジット')">クレジット</button>
+    <button class="payment-button" onclick="selectPayment('現金')">現金</button>
+    <button class="payment-button" onclick="selectPayment('WAON')">WAON</button>
+    <button class="payment-button" onclick="selectPayment('QR')">QR</button>
+  </div>
+
+  <!-- 購入金額表示と電卓 -->
+  <div id="display">0</div>
+  <div id="calculator">
+    <button class="number-button" onclick="pressNumber('7')">7</button>
+    <button class="number-button" onclick="pressNumber('8')">8</button>
+    <button class="number-button" onclick="pressNumber('9')">9</button>
+    <button class="number-button" onclick="pressNumber('4')">4</button>
+    <button class="number-button" onclick="pressNumber('5')">5</button>
+    <button class="number-button" onclick="pressNumber('6')">6</button>
+    <button class="number-button" onclick="pressNumber('1')">1</button>
+    <button class="number-button" onclick="pressNumber('2')">2</button>
+    <button class="number-button" onclick="pressNumber('3')">3</button>
+    <button class="backspace-button" onclick="backspace()">Backspace</button>
+    <button class="number-button" onclick="pressNumber('0')">0</button>
+    <button class="ok-button" onclick="confirmData()">OK</button>
+  </div>
+
+  <!-- データ表示用テーブル -->
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>時間</th>
+        <th>性別</th>
+        <th>年齢</th>
+        <th>支払い方法</th>
+        <th>購入金額</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- データがここに追加されます -->
+    </tbody>
+  </table>
+
   <script>
-    // Firebaseの設定
-    const firebaseConfig = {
-        apiKey: "AIzaSyAzDStUOQsPssdqSIQed6z8snsHL8r5q3o",
-        authDomain: "ichiedata-2075b.firebaseapp.com",
-        databaseURL: "https://ichiedata-2075b-default-rtdb.firebaseio.com",
-        projectId: "ichiedata-2075b",
-        storageBucket: "ichiedata-2075b.firebasestorage.app",
-        messagingSenderId: "378556332609",
-        appId: "1:378556332609:web:e58a5579cff83664d2e4c0",
-        measurementId: "G-ZXTMWCMH1G"
-    };
+    let selectedGender = null;
+    let selectedAge = null;
+    let selectedPayment = null;
+    let purchaseAmount = "";
 
-    // Firebaseの初期化
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    let customerData = [];
-    let selectedGender = null; // 一時的に性別を保存
-
-    // 性別を選択
     function selectGender(gender) {
       selectedGender = gender;
-      alert(`${gender} を選択しました。年齢を選択してください`);
+      highlightSelectedButton("gender-buttons", gender);
+      updateInstruction();
     }
 
-    // 性別と年齢を保存
-    function saveGenderAndAge(age) {
-      if (!selectedGender) {
-        alert("先に性別を選択してください！");
+    function selectAge(age) {
+      selectedAge = age;
+      highlightSelectedButton("age-buttons", age);
+      updateInstruction();
+    }
+
+    function selectPayment(payment) {
+      selectedPayment = payment;
+      highlightSelectedButton("payment-methods", payment);
+      updateInstruction();
+    }
+
+    function pressNumber(num) {
+      purchaseAmount += num;
+      updateDisplay();
+      updateInstruction();
+    }
+
+    function backspace() {
+      purchaseAmount = purchaseAmount.slice(0, -1);
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      document.getElementById("display").textContent = purchaseAmount || "0";
+    }
+
+    function confirmData() {
+      if (!selectedGender || !selectedAge || !selectedPayment || !purchaseAmount) {
+        alert("すべての項目を選択してください");
         return;
       }
+      const currentTime = new Date().toLocaleString();
+      addRow(currentTime, selectedGender, selectedAge, selectedPayment, purchaseAmount);
+      resetSelections();
+    }
 
-      const timestamp = new Date().toISOString();
-      const genderAndAge = `${selectedGender}-${age}`;
-      customerData.push({ genderAndAge, timestamp });
-      localStorage.setItem("customerData", JSON.stringify(customerData));
-      alert(`${genderAndAge} を保存完了！！！`);
+    function addRow(time, gender, age, payment, amount) {
+      const tableBody = document.querySelector("#data-table tbody");
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+        <td>${time}</td>
+        <td>${gender}</td>
+        <td>${age}</td>
+        <td>${payment}</td>
+        <td>${amount}</td>
+      `;
+      tableBody.appendChild(newRow);
+    }
 
-      // 選択をリセット
+    function resetSelections() {
       selectedGender = null;
+      selectedAge = null;
+      selectedPayment = null;
+      purchaseAmount = "";
+      updateDisplay();
+      updateInstruction();
+      resetButtonHighlights();
     }
 
-    // データ送信関数
-    function sendDataToFirebase() {
-      const storedData = localStorage.getItem("customerData");
-      if (!storedData) {
-        alert("送信するデータがありません。");
-        return;
+    function highlightSelectedButton(parentId, value) {
+      const parent = document.getElementById(parentId);
+      const buttons = parent.querySelectorAll("button");
+      buttons.forEach(button => {
+        button.classList.remove("selected");
+        if (button.textContent === value) {
+          button.classList.add("selected");
+        }
+      });
+    }
+
+    function resetButtonHighlights() {
+      document.querySelectorAll(".selected").forEach(button => {
+        button.classList.remove("selected");
+      });
+    }
+
+    function updateInstruction() {
+      const instructionElement = document.getElementById("instruction");
+      if (!selectedGender) {
+        instructionElement.textContent = "性別を選択してください";
+      } else if (!selectedAge) {
+        instructionElement.textContent = "年齢を選択してください";
+      } else if (!selectedPayment) {
+        instructionElement.textContent = "支払い方法を選択してください";
+      } else if (!purchaseAmount) {
+        instructionElement.textContent = "購入金額を入力してください";
+      } else {
+        instructionElement.textContent = "OKを押してデータを確認してください";
       }
-
-      const data = JSON.parse(storedData);
-      const timestamp = new Date().toISOString();
-
-      // 使用できない文字を置き換え
-      const sanitizedTimestamp = timestamp.replace(/\./g, "_").replace(/:/g, "-");
-
-      console.log("送信するデータ: ", data); // デバッグ用ログ
-
-      const dbRef = database.ref("customerData/" + sanitizedTimestamp);
-      dbRef.set(data)
-        .then(() => {
-          alert("データを送信しました！");
-          localStorage.clear();
-          customerData = [];
-        })
-        .catch((error) => {
-          console.error("送信エラー: ", error);
-          alert("送信に失敗しました: " + error.message);
-        });
-    }
-
-    // ローカルストレージ削除関数
-    function clearLocalStorage() {
-      localStorage.clear();
-      customerData = [];
-      alert("ローカルストレージを削除");
     }
   </script>
 </body>
